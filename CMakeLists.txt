@@ -29,7 +29,7 @@ if(WIN32)
 
     target_include_directories(SciVis_2025 PRIVATE ${GLFW}/include)
 
-    target_link_directories(SciVis_2025 PRIVATE ${GLFW}/lib-vc2022)
+    target_link_libraries(SciVis_2025 PRIVATE ${GLFW}/lib-vc2022/glfw3dll.lib)
 
     set(TO_COPY ${GLFW}/lib-vc2022/glfw3.dll)
 
