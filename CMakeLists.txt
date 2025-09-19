@@ -10,16 +10,18 @@ set(GLM glm-1.0.1)
 set(SOURCES
     ${SRC}/main.cpp
     ${SRC}/quadmesh.cpp
+    ${SRC}/drawitem.cpp
     ${SRC}/shader.cpp
     ${SRC}/trackball.cpp
-    ${SRC}/quadmesh.cpp
-    ${GLAD}/src/glad.c
 )
 add_executable(SciVis_2025 ${SOURCES})
 
 target_include_directories(SciVis_2025 PRIVATE include)
-target_include_directories(SciVis_2025 PRIVATE ${GLAD}/include)
-target_include_directories(SciVis_2025 PRIVATE ${GLM}/glm)
+target_include_directories(SciVis_2025 PRIVATE ${GLM})
+
+add_library(glad_lib STATIC ${GLAD}/src/glad.c)
+target_include_directories(glad_lib PUBLIC ${GLAD}/include)
+target_link_libraries(SciVis_2025 PRIVATE glad_lib)
 
 if(WIN32)
 

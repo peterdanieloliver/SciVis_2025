@@ -52,8 +52,8 @@ public:
     void set_vector(const glm::dvec3& v);
     void set_tensor(const glm::dmat2x2& t);
 
-    void add_edge(const std::shared_ptr<Edge>& e);
-    void add_face(const std::shared_ptr<Face>& f);
+    void add_edge(const std::shared_ptr<Edge> e);
+    void add_face(const std::shared_ptr<Face> f);
     const std::vector<std::shared_ptr<Edge>>& edges() const;
     const std::vector<std::shared_ptr<Face>>& faces() const;
     std::vector<std::shared_ptr<Edge>>& edges();
@@ -79,24 +79,23 @@ private:
 
 public:
 
-    Edge(unsigned int id, const std::shared_ptr<Vertex>& v1, const std::shared_ptr<Vertex>& v2);
+    Edge(unsigned int id, const std::shared_ptr<Vertex> v1, const std::shared_ptr<Vertex> v2);
     ~Edge();
 
     unsigned int id() const;
-    const std::shared_ptr<Vertex>& v1() const;
-    const std::shared_ptr<Vertex>& v2() const;
-    std::shared_ptr<Vertex>& v1();
-    std::shared_ptr<Vertex>& v2();
-    const std::shared_ptr<Vertex>& other_vertex(const std::shared_ptr<Vertex>& v) const;
-    std::shared_ptr<Vertex>& other_vertex(const std::shared_ptr<Vertex>& v);
+    const std::shared_ptr<Vertex> v1() const;
+    const std::shared_ptr<Vertex> v2() const;
+    std::shared_ptr<Vertex> v1();
+    std::shared_ptr<Vertex> v2();
+    const std::shared_ptr<Vertex> other_vertex(const std::shared_ptr<Vertex> v) const;
+    std::shared_ptr<Vertex> other_vertex(const std::shared_ptr<Vertex> v);
 
-    
     const std::vector<std::shared_ptr<Face>>& faces() const;
     std::vector<std::shared_ptr<Face>>& faces();
     size_t num_faces() const;
-    const std::shared_ptr<Face>& other_face(const std::shared_ptr<Face>& f) const;
-    std::shared_ptr<Face>& other_face(const std::shared_ptr<Face>& f);
-    void add_face(const std::shared_ptr<Face>& f);
+    const std::shared_ptr<Face> other_face(const std::shared_ptr<Face> f) const;
+    std::shared_ptr<Face> other_face(const std::shared_ptr<Face> f);
+    void add_face(const std::shared_ptr<Face> f);
 
     double length() const;
 };

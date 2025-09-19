@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "trackball.h"
 #include "quadmesh.h"
+#include "drawitem.h"
 
 
 
@@ -37,7 +38,7 @@ glm::vec3 objectColor(0.6f, 0.6f, 0.6f);
 
 // objects
 std::unique_ptr<Trackball> trackball = nullptr;
-std::shared_ptr<QuadMesh> mesh_data = nullptr;
+std::unique_ptr<QuadMesh> mesh_data = nullptr;
 
 // Helper functions
 void set_scene();
@@ -59,8 +60,18 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 ;///////////////////////////////////////////////////////////////////////////////
 ;///////////////////////////////////////////////////////////////////////////////
 
-int main()
+int main(int argc, char* argv[])
 {
+	// check command line arguments
+    const char* data_path = "";
+    if (argc > 1)
+        data_path = argv[1];
+    else
+    {
+		std::cout << "Usage: " << argv[0] << " <path to PLY file>" << std::endl;
+        return -1;
+    }
+
     // Initialize GLFW
     if (!glfwInit())
     {
@@ -98,60 +109,72 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-
-    // read in and compile shaders
-    Shader surfaceShader("../shaders/vertex_shader.glsl", "../shaders/fragment_shader.glsl");
-
-    mesh_data = std::make_unique<QuadMesh>("../data/scalar_data/r10.ply");
-
+    
     // Create trackball object
     trackball = std::make_unique<Trackball>(0.8f);
 
-    // get the vertices and faces from the mesh
-    std::vector<glm::vec3> vertex_data;
-    std::vector<unsigned int> face_data;
-    vertex_data.reserve(mesh_data->num_vertices() * 2); // vertex position and normal
-    face_data.reserve(mesh_data->num_faces() * 6); // each quad face will be drawn as two triangles
-    for (const std::shared_ptr<Vertex>& v : mesh_data->vertices())
-    {
-        vertex_data.push_back(glm::vec3(v->pos()));
-        vertex_data.push_back(glm::vec3(v->normal()));
-    }
-    for (const std::shared_ptr<Face>& f : mesh_data->faces())
-    {
-		std::vector<std::shared_ptr<Vertex>> verts = f->vertices();
-		face_data.push_back(verts[0]->id()); // lower right triangle
-		face_data.push_back(verts[1]->id());
-		face_data.push_back(verts[2]->id());
-        face_data.push_back(verts[2]->id()); // upper left triangle
-		face_data.push_back(verts[3]->id());
-		face_data.push_back(verts[0]->id());
-    }
+    // load in mesh data
+    mesh_data = std::make_unique<QuadMesh>(data_path);
 
-    // set up buffers and arrays
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    // read in and compile shaders
+    std::unique_ptr<Shader> surfaceShader = 
+        std::make_unique<Shader>("../shaders/vertex_shader.glsl", 
+                                 "../shaders/fragment_shader.glsl");
 
-    glBindVertexArray(VAO);
+    // create drawable item from the mesh
+    std::unique_ptr<DrawItem> mesh_surface = 
+        std::make_unique<DrawItem>(*mesh_data, DrawItem::DrawMode::Surface);
 
-    // load vertex data into vertex buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertex_data.size() * 2 * sizeof(glm::vec3), &vertex_data[0], GL_STATIC_DRAW);
 
-	// load face data into element buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_data.size() * sizeof(unsigned int), &face_data[0], GL_STATIC_DRAW);
-
-    // set the vertex attribute pointers
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
     
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+
+    
+
+    // // get the vertices and faces from the mesh
+    // std::vector<glm::vec3> vertex_data;
+    // std::vector<unsigned int> face_data;
+    // vertex_data.reserve(mesh_data->num_vertices() * 2); // vertex position and normal
+    // face_data.reserve(mesh_data->num_faces() * 6); // each quad face will be drawn as two triangles
+    // for (const std::shared_ptr<Vertex>& v : mesh_data->vertices())
+    // {
+    //     vertex_data.push_back(glm::vec3(v->pos()));
+    //     vertex_data.push_back(glm::vec3(v->normal()));
+    // }
+    // for (const std::shared_ptr<Face>& f : mesh_data->faces())
+    // {
+	// 	std::vector<std::shared_ptr<Vertex>> verts = f->vertices();
+	// 	face_data.push_back(verts[0]->id()); // lower right triangle
+	// 	face_data.push_back(verts[1]->id());
+	// 	face_data.push_back(verts[2]->id());
+    //     face_data.push_back(verts[2]->id()); // upper left triangle
+	// 	face_data.push_back(verts[3]->id());
+	// 	face_data.push_back(verts[0]->id());
+    // }
+
+    // // set up buffers and arrays
+    // unsigned int VBO, VAO, EBO;
+    // glGenVertexArrays(1, &VAO);
+    // glGenBuffers(1, &VBO);
+    // glGenBuffers(1, &EBO);
+
+    // glBindVertexArray(VAO);
+
+    // // load vertex data into vertex buffer
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // glBufferData(GL_ARRAY_BUFFER, vertex_data.size() * 2 * sizeof(glm::vec3), &vertex_data[0], GL_STATIC_DRAW);
+
+	// // load face data into element buffer
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_data.size() * sizeof(unsigned int), &face_data[0], GL_STATIC_DRAW);
+
+    // // set the vertex attribute pointers
+    // glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
+	// glEnableVertexAttribArray(1);
+	// glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
+    
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
 
     // Display Loop
     while (!glfwWindowShouldClose(window)) 
@@ -159,27 +182,31 @@ int main()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_MULTISAMPLE);
+		glEnable(GL_DEPTH_TEST);
         set_scene();
         
-        // Draw triangle
-        surfaceShader.use();
-        surfaceShader.setMat4("projectionMatrix", projection);
-        surfaceShader.setMat4("viewMatrix", view);
-        surfaceShader.setMat4("modelMatrix", model);
-		surfaceShader.setVec3("lightPos", lightPos);
-		surfaceShader.setVec3("lightColor", lightColor);
-		surfaceShader.setVec3("objectColor", objectColor);
-		surfaceShader.setVec3("viewPos", cameraPos);
-		surfaceShader.setFloat("ambientStrength", 0.1f);
-		surfaceShader.setFloat("diffuseStrength", 1.0f);
-		surfaceShader.setFloat("specularStrength", 0.1f);
-		surfaceShader.setFloat("shininess", 512.0f);
+        // Enable shader and set uniform variables
+        surfaceShader->use();
+        surfaceShader->setMat4("projectionMatrix", projection);
+        surfaceShader->setMat4("viewMatrix", view);
+        surfaceShader->setMat4("modelMatrix", model);        
+        surfaceShader->setVec3("lightPos", lightPos);
+        surfaceShader->setVec3("lightColor", lightColor);
+        surfaceShader->setVec3("objectColor", objectColor);
+        surfaceShader->setVec3("viewPos", cameraPos);
+        surfaceShader->setFloat("ambientStrength", 0.1f);
+        surfaceShader->setFloat("diffuseStrength", 1.0f);
+        surfaceShader->setFloat("specularStrength", 0.1f);
+        surfaceShader->setFloat("shininess", 512.0f);
 
-        glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(face_data.size()), GL_UNSIGNED_INT, 0);
+        // draw mesh surface
+        mesh_surface->draw();
+
+        // glBindVertexArray(VAO);
+		// glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(face_data.size()), GL_UNSIGNED_INT, 0);
         
-        glBindVertexArray(0);
-        glUseProgram(0);
+        // glBindVertexArray(0);
+        // glUseProgram(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -215,8 +242,7 @@ void set_scene()
     model = glm::mat4(1.0f);
     model = glm::translate(model, TRANSLATION);
     model = model * ROTATION;
-	//model = glm::scale(model, glm::vec3(0.06f, 0.06f, 0.06f));
-    model = glm::scale(model, glm::vec3(0.9f / mesh_data->get_radius()));
+    model = glm::scale(model, glm::vec3(0.9f / static_cast<float>(mesh_data->get_radius())));
 	model = glm::translate(model, -glm::vec3(mesh_data->midpoint()));
     
 }

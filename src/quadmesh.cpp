@@ -40,8 +40,8 @@ void Vertex::set_scalar(double s) { m_scalar = s; }
 void Vertex::set_vector(const glm::dvec3& v) { m_vector = v; }
 void Vertex::set_tensor(const glm::dmat2x2& t) { m_tensor = t; }
 
-void Vertex::add_edge(const std::shared_ptr<Edge>& e) { m_edges.push_back(e); }
-void Vertex::add_face(const std::shared_ptr<Face>& f) { m_faces.push_back(f); }
+void Vertex::add_edge(const std::shared_ptr<Edge> e) { m_edges.push_back(e); }
+void Vertex::add_face(const std::shared_ptr<Face> f) { m_faces.push_back(f); }
 const std::vector<std::shared_ptr<Edge>>& Vertex::edges() const { return m_edges; }
 const std::vector<std::shared_ptr<Face>>& Vertex::faces() const { return m_faces; }
 std::vector<std::shared_ptr<Edge>>& Vertex::edges() { return m_edges; }
@@ -78,7 +78,7 @@ void Vertex::reorder_pointers()
     while (face)
     {
         auto it = std::find(face->vertices().begin(), face->vertices().end(), shared_from_this());
-        int idx = std::distance(face->vertices().begin(), it);
+        int idx = static_cast<int>(std::distance(face->vertices().begin(), it));
         edge = face->edges()[(idx + 3) % 4]; // edge before this vertex in face
         forward_edges.push_back(edge);
         face = edge->other_face(face);
@@ -99,7 +99,7 @@ void Vertex::reorder_pointers()
     while (face)
     {
         auto it = std::find(face->vertices().begin(), face->vertices().end(), shared_from_this());
-        int idx = std::distance(face->vertices().begin(), it);
+        int idx = static_cast<int>(std::distance(face->vertices().begin(), it));
         edge = face->edges()[idx]; // edge after this vertex in face
         backward_edges.push_back(edge);
         face = edge->other_face(face);
@@ -126,7 +126,7 @@ void Vertex::reorder_pointers()
 ;///////////////////////////////////////////////////////////////////////////////
 ;///////////////////////////////////////////////////////////////////////////////
 
-Edge::Edge(unsigned int id, const std::shared_ptr<Vertex>& v1, const std::shared_ptr<Vertex>& v2)
+Edge::Edge(unsigned int id, const std::shared_ptr<Vertex> v1, const std::shared_ptr<Vertex> v2)
 {
     m_id = id;
     m_v1 = v1;
@@ -135,16 +135,16 @@ Edge::Edge(unsigned int id, const std::shared_ptr<Vertex>& v1, const std::shared
 Edge::~Edge() {}
 
 unsigned int Edge::id() const { return m_id; }
-const std::shared_ptr<Vertex>& Edge::v1() const { return m_v1; }
-const std::shared_ptr<Vertex>& Edge::v2() const { return m_v2; }
-std::shared_ptr<Vertex>& Edge::v1() { return m_v1; }
-std::shared_ptr<Vertex>& Edge::v2() { return m_v2; }
+const std::shared_ptr<Vertex> Edge::v1() const { return m_v1; }
+const std::shared_ptr<Vertex> Edge::v2() const { return m_v2; }
+std::shared_ptr<Vertex> Edge::v1() { return m_v1; }
+std::shared_ptr<Vertex> Edge::v2() { return m_v2; }
 const std::vector<std::shared_ptr<Face>>& Edge::faces() const { return m_faces; }
 std::vector<std::shared_ptr<Face>>& Edge::faces() { return m_faces; }
 size_t Edge::num_faces() const { return m_faces.size(); }
-void Edge::add_face(const std::shared_ptr<Face>& f) { m_faces.push_back(f);}
+void Edge::add_face(const std::shared_ptr<Face> f) { m_faces.push_back(f);}
 
-const std::shared_ptr<Vertex>& Edge::other_vertex(const std::shared_ptr<Vertex>& v) const
+const std::shared_ptr<Vertex> Edge::other_vertex(const std::shared_ptr<Vertex> v) const
 {
     if (v == m_v1) 
         return m_v2;
@@ -152,7 +152,7 @@ const std::shared_ptr<Vertex>& Edge::other_vertex(const std::shared_ptr<Vertex>&
         return m_v1;
 }
 
-std::shared_ptr<Vertex>& Edge::other_vertex(const std::shared_ptr<Vertex>& v) 
+std::shared_ptr<Vertex> Edge::other_vertex(const std::shared_ptr<Vertex> v) 
 {
     if (v == m_v1) 
         return m_v2;
@@ -160,7 +160,7 @@ std::shared_ptr<Vertex>& Edge::other_vertex(const std::shared_ptr<Vertex>& v)
         return m_v1;
 }
 
-const std::shared_ptr<Face>& Edge::other_face(const std::shared_ptr<Face>& f) const
+const std::shared_ptr<Face> Edge::other_face(const std::shared_ptr<Face> f) const
 {
     std::shared_ptr<Face> result = nullptr;
     if (m_faces.size() == 2) 
@@ -173,7 +173,7 @@ const std::shared_ptr<Face>& Edge::other_face(const std::shared_ptr<Face>& f) co
     return result;
 }
 
-std::shared_ptr<Face>& Edge::other_face(const std::shared_ptr<Face>& f)
+std::shared_ptr<Face> Edge::other_face(const std::shared_ptr<Face> f)
 {
     std::shared_ptr<Face> result = nullptr;
     if (m_faces.size() == 2) 
